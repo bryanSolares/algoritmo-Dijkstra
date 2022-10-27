@@ -1,0 +1,36 @@
+{
+  "name": "cytoscape-popper",
+  "description": "A Cytoscape.js extension for Popper.js",
+  "main": "cytoscape-popper.js",
+  "dependencies": {
+    "cytoscape": "^3.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cytoscape/cytoscape.js-popper.git"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "keywords": [
+    "cytoscape",
+    "cytoscape-extension"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/cytoscape/cytoscape.js-popper",
+  "version": "2.0.0",
+  "_release": "2.0.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.0.0",
+    "commit": "4838cc816b7460b791940227661019126c127042"
+  },
+  "_source": "https://github.com/cytoscape/cytoscape.js-popper.git",
+  "_target": "^2.0.0",
+  "_originalSource": "cytoscape-popper",
+  "_direct": true
+}
