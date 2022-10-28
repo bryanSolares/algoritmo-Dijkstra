@@ -3,7 +3,7 @@ const origenID = document.getElementById("OrigenID");
 const destinoID = document.getElementById("DestinoID");
 const costoID = document.getElementById("CostoID");
 const nuevo = { nodes: [], edges: [] };
-const rutaCorta = [];
+let rutaCorta = [];
 const tabla = {};
 const graph = {};
 
@@ -80,7 +80,7 @@ let cargarGraficos = () => {
       },
     ],
     layout: {
-      name: "breadthfirst",
+      name: "circle",
       fit: true,
       avoidOverlap: true,
     },
@@ -98,7 +98,6 @@ let rutaMasCorta = () => {
   } else {
     try {
       let dijkstra = graph.cy.elements().dijkstra(origen, function (edge) {
-        // console.log();
         return parseInt(edge.data("value"));
       });
 
@@ -106,9 +105,10 @@ let rutaMasCorta = () => {
 
       let total = 0;
       for (i = 0; i < pathTo.edges().size(); i++) {
+        const { id } = pathTo.nodes()[i].data();
         const { source, target, value } = pathTo.edges()[i].data();
         total = total + parseInt(value);
-        // rutaCorta.push({ origen: source, destino: target, peso: value });
+        rutaCorta.push({ id, origen: source, destino: target, peso: value, acumulado: total });
       }
 
       var i = 0;
@@ -121,13 +121,6 @@ let rutaMasCorta = () => {
           if (pathTo.edges()[i]) {
             const { source, target, value } = pathTo.edges()[i].data();
             pathTo.edges()[i].addClass("highlighted");
-            if (i === 0) {
-              console.log({ i, source, target, value });
-              addPooper(source, `[0,-]`);
-            } else {
-              console.log({ i, source, target, value });
-              addPooper(source, `[${value},${target}]`);
-            }
           }
 
           i++;
@@ -135,6 +128,7 @@ let rutaMasCorta = () => {
         }
       };
       highlightNextEle();
+      renderLabels();
 
       document.getElementById("resultado").innerHTML = "El valor del viaje es de " + total;
     } catch (error) {
@@ -175,6 +169,7 @@ const clearAllTags = () => {
   listaEtiquetas.forEach((tag) => {
     tag.remove();
   });
+  rutaCorta = [];
 };
 
 $(document).ready(function () {
@@ -190,3 +185,36 @@ $(document).ready(function () {
     select: true,
   });
 });
+
+const renderLabels = () => {
+  rutaCorta.forEach(({ id, origen, destino, acumulado }, index) => {
+    if (index === 0) {
+      addPooper(destino, `[0,-]`);
+      if (id === origen) {
+        addPooper(origen, `[${acumulado},${destino}]`);
+      } else {
+        addPooper(destino, `[${acumulado},${origen}]`);
+      }
+      addPooper(origen, `[${acumulado},${destino}]`);
+    } else {
+      addPooper(destino, `[${acumulado},${origen}]`);
+    }
+  });
+};
+
+// [
+//   {
+//     id: "b",
+//     origen: "a",
+//     destino: "b",
+//     peso: "1",
+//     acumulado: 1,
+//   },
+//   {
+//     id: "a",
+//     origen: "a",
+//     destino: "c",
+//     peso: "1",
+//     acumulado: 2,
+//   },
+// ];
