@@ -1,6 +1,9 @@
 const btnAddTable = document.getElementById("btnAddTable");
-const btnColorGraph = document.getElementById("btnColorGraph");
+const origenID = document.getElementById("OrigenID");
+const destinoID = document.getElementById("DestinoID");
+const costoID = document.getElementById("CostoID");
 const nuevo = { nodes: [], edges: [] };
+const rutaCorta = [];
 const tabla = {};
 const graph = {};
 
@@ -9,15 +12,10 @@ btnAddTable.addEventListener("click", (event) => {
   añadir();
 });
 
-btnColorGraph.addEventListener("click", (event) => {
-  event.preventDefault();
-  paintRoute();
-});
-
 let añadir = () => {
-  let origen = document.getElementById("OrigenID").value;
-  let destino = document.getElementById("DestinoID").value;
-  let costo = document.getElementById("CostoID").value;
+  let origen = origenID.value;
+  let destino = destinoID.value;
+  let costo = costoID.value;
 
   //Validacion agregada
   if (origen == "" || destino == "" || costo == "") {
@@ -31,10 +29,12 @@ let añadir = () => {
       nuevo.nodes.push({ data: { id: destino } });
     }
     nuevo.edges.push({ data: { source: origen, target: destino, value: costo } });
-    console.log(nuevo);
     tabla.esta.clear().draw(); //Clear datatables
     tabla.esta.rows.add(nuevo.edges).draw();
-    console.log("Redibujado");
+    origenID.value = "";
+    destinoID.value = "";
+    costoID.value = "";
+    origenID.focus();
   }
 };
 const random_hex_color_code = () => {
@@ -43,6 +43,7 @@ const random_hex_color_code = () => {
 };
 
 let cargarGraficos = () => {
+  clearAllTags();
   graph.cy = cytoscape({
     container: $("#graficos"),
     elements: nuevo,
@@ -72,14 +73,14 @@ let cargarGraficos = () => {
           "background-color": "#8DFF33",
           "line-color": "#FF5733",
           "target-arrow-color": "#FF5733",
-          "target-arrow-shape": "triangle",
+          // "target-arrow-shape": "triangle",
           "transition-property": "background-color, line-color, target-arrow-color",
-          "transition-duration": "0.10s",
+          "transition-duration": "0.20s",
         },
       },
     ],
     layout: {
-      name: "circle",
+      name: "breadthfirst",
       fit: true,
       avoidOverlap: true,
     },
@@ -87,6 +88,7 @@ let cargarGraficos = () => {
 };
 
 let rutaMasCorta = () => {
+  clearAllTags();
   let origen = "#" + document.getElementById("rmcOrigen").value;
   let destino = "#" + document.getElementById("rmcDestino").value;
 
@@ -94,30 +96,46 @@ let rutaMasCorta = () => {
   if (origen == "#" || destino == "#") {
     alert("No se permite un origen o destino en blanco para encontrar la ruta mas corta");
   } else {
-    console.log(origen);
-    console.log(destino);
     try {
-      let dijkstra = myCy.cy.elements().dijkstra(origen, function (edge) {
-        return edge.data("value");
+      let dijkstra = graph.cy.elements().dijkstra(origen, function (edge) {
+        // console.log();
+        return parseInt(edge.data("value"));
       });
-      let pathTo = dijkstra.pathTo(myCy.cy.$(destino));
-      console.log("Nodes Size - " + pathTo.nodes().size());
-      console.log("Edges Size - " + pathTo.edges().size());
-      // for (i = 0, j = 0; i < pathTo.nodes().size() + 1, j < pathTo.edges().size(); i++, j++) {
-      //     console.log('Node - \t' + pathTo.nodes()[i].data('id'));
-      //     let actualPath = pathTo.nodes()[i].data('id');
-      //     setTimeout(myCy.cy.$('#' + actualPath).animate({ style: { backgroundColor: 'red' } }), 500);
-      //     console.log('edge - \t' + pathTo.edges()[j].data('id'));
-      //     console.log('value - \t' + pathTo.edges()[j].data('value'));
-      // }
+
+      let pathTo = dijkstra.pathTo(graph.cy.$(destino));
+
       let total = 0;
       for (i = 0; i < pathTo.edges().size(); i++) {
-        total = total + parseInt(pathTo.edges()[i].data("value"));
+        const { source, target, value } = pathTo.edges()[i].data();
+        total = total + parseInt(value);
+        // rutaCorta.push({ origen: source, destino: target, peso: value });
       }
-      for (i = 0; i < pathTo.nodes().size(); i++) {
-        let actualPath = pathTo.nodes()[i].data("id");
-        setTimeout(myCy.cy.$("#" + actualPath).animate({ style: { backgroundColor: "red" } }), 1500);
-      }
+
+      var i = 0;
+      const highlightNextEle = function () {
+        if (i < pathTo.nodes().size()) {
+          if (pathTo.nodes()[i]) {
+            pathTo.nodes()[i].addClass("highlighted");
+          }
+
+          if (pathTo.edges()[i]) {
+            const { source, target, value } = pathTo.edges()[i].data();
+            pathTo.edges()[i].addClass("highlighted");
+            if (i === 0) {
+              console.log({ i, source, target, value });
+              addPooper(source, `[0,-]`);
+            } else {
+              console.log({ i, source, target, value });
+              addPooper(source, `[${value},${target}]`);
+            }
+          }
+
+          i++;
+          setTimeout(highlightNextEle, 500);
+        }
+      };
+      highlightNextEle();
+
       document.getElementById("resultado").innerHTML = "El valor del viaje es de " + total;
     } catch (error) {
       console.log(error);
@@ -128,12 +146,35 @@ let rutaMasCorta = () => {
 document.getElementById("generar").onclick = cargarGraficos;
 document.getElementById("encontraBoton").onclick = rutaMasCorta;
 
-//Camino más corto con Dijkstra
-
-//Funcionalidad boton agregado
 let Limpiar = () => {
-  /*document.getElementById("graficos").innerHTML = "";*/
   location.reload();
+};
+
+const addPooper = (id, text) => {
+  const ref = graph.cy.getElementById(id).popperRef();
+  const dummyDomEle = document.createElement("div");
+  tippy(dummyDomEle, {
+    getReferenceClientRect: ref.getBoundingClientRect,
+    trigger: "manual",
+    content: function () {
+      const div = document.createElement("div");
+      div.innerHTML = text;
+      return div;
+    },
+    arrow: true,
+    placement: "top",
+    hideOnClick: false,
+    sticky: "reference",
+    interactive: true,
+    appendTo: document.body,
+  }).show();
+};
+
+const clearAllTags = () => {
+  const listaEtiquetas = document.querySelectorAll("[data-tippy-root]");
+  listaEtiquetas.forEach((tag) => {
+    tag.remove();
+  });
 };
 
 $(document).ready(function () {
@@ -146,20 +187,6 @@ $(document).ready(function () {
     scrollCollapse: true,
     data: nuevo.edges,
     columns: [{ data: "data.source" }, { data: "data.target" }, { data: "data.value" }],
+    select: true,
   });
 });
-
-const paintRoute = () => {
-  const bfs = graph.cy.elements().bfs("#a", function () {}, true);
-
-  let i = 0;
-  const highlightNextEle = function () {
-    if (i < bfs.path.length) {
-      bfs.path[i].addClass("highlighted");
-      i++;
-      setTimeout(highlightNextEle, 1500);
-    }
-  };
-
-  highlightNextEle();
-};

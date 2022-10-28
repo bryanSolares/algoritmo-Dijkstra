@@ -24,6 +24,10 @@
     <!-- Cytoscape -->
     <script src="bower_components/cytoscape/dist/cytoscape.min.js"></script>
 
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="./js/cytoscape-popper.js"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+
 
 </head>
 
@@ -32,7 +36,6 @@
     <h3>
         Algoritmo de <small class="text-muted">Dijsktra</small>
     </h3>
-    <!-- <br /> -->
 
 
     <div class="container-fluid">
@@ -66,9 +69,6 @@
                             Añadir
                         </button>
 
-                        <button id="btnColorGraph" type="button" class="btn btn-primary">
-                            Colorear
-                        </button>
                     </div>
                     <table id="datos" class="display" style="width: 100%">
                         <thead>
