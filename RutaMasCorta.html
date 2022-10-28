@@ -33,7 +33,7 @@
 
 <body>
 
-    <h3>
+    <h3 class="fs-1 text-center">
         Algoritmo de <small class="text-muted">Dijsktra</small>
     </h3>
 
@@ -46,30 +46,44 @@
                 class="p-3 mb-2 bg-secondary text-white bg-opacity-25"></div>
         </div>
         <br />
+
         <div class="row">
             <!-- Para añadir datos -->
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <div id="MisDatos">
-                    <div class="input-group mb-3">
+                    <!-- <div class="input-group mb-3"> -->
 
-                        <!-- Origen -->
-                        <span class="input-group-text " id="inputOrigenSpan">Origen</span>
-                        <input id="OrigenID" type="text" class="form-control" placeholder="Añada el nombre origen"
-                            aria-label="inputOrigen" aria-describedby="inputOrigenSpan" />
-                        <!-- Destino -->
-                        <span class="input-group-text" id="inputDestinoSpan">Destino</span>
-                        <input id="DestinoID" type="text" class="form-control" placeholder="Añada el nombre destino"
-                            aria-label="inputDestino" aria-describedby="inputDestinoSpan" />
-                        <!-- Costo -->
-                        <span class="input-group-text" id="inputCostoSpan">Costo</span>
-                        <input id="CostoID" type="number" class="form-control"
-                            placeholder="Añada el costo de origen a destino" aria-label="inputCosto"
-                            aria-describedby="inputCostoSpan" />
-                        <button id="btnAddTable" type="button" class="btn btn-primary">
-                            Añadir
-                        </button>
+                    <!-- Origen -->
+                    <div class="input-group mb-1">
 
+                        <span class="input-group-text " id="inputOrigenSpan">Nodo Origen</span>
+                        <input id="OrigenID" type="text" class="form-control" placeholder="A" aria-label="inputOrigen"
+                            aria-describedby="inputOrigenSpan" />
                     </div>
+                    <div class="input-group mb-1">
+                        <!-- Destino -->
+                        <span class="input-group-text" id="inputDestinoSpan">Nodo Destino</span>
+                        <input id="DestinoID" type="text" class="form-control" placeholder="B" aria-label="inputDestino"
+                            aria-describedby="inputDestinoSpan" />
+                    </div>
+                    <div class="input-group mb-1">
+                        <!-- Costo -->
+                        <span class="input-group-text" id="inputCostoSpan">Costo Comunicacion</span>
+                        <input id="CostoID" type="number" class="form-control" placeholder="1" aria-label="inputCosto"
+                            aria-describedby="inputCostoSpan" />
+                    </div>
+
+                    <div class="d-flex ">
+
+                        <button id="btnAddTable" type="button" class="btn btn-primary flex-fill me-2">Añadir</button>
+                        <button id="btnGenerate" type="button"
+                            class="btn btn-warning flex-fill me-2 disabled">Generar</button>
+                        <button id="btnClean" type="button" class="btn btn-danger flex-fill disabled"
+                            onclick="Limpiar()">Limpiar</button>
+                    </div>
+
+
+                    <!-- </div> -->
                     <table id="datos" class="display" style="width: 100%">
                         <thead>
                             <tr>
@@ -81,12 +95,9 @@
                     </table>
                 </div>
             </div>
-            <div class="col-md-4">
-                <button type="button" id="generar" class="btn btn-warning" btn btn-primary>Generar</button>
-                <button type="button" class="btn btn-danger" onclick="Limpiar()">Limpiar</button>
+            <div class="col-md-6">
+
                 <!-- Input ruta más corta -->
-                <br>
-                <br>
                 <p class="fs-4 text-center"> Encontrar ruta más corta con Dijkstra</p>
                 <div class="input-group mb-3">
                     <!-- Origen -->

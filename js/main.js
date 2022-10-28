@@ -1,4 +1,6 @@
 const btnAddTable = document.getElementById("btnAddTable");
+const btnGenerate = document.getElementById("btnGenerate");
+const btnClose = document.getElementById("btnClose");
 const origenID = document.getElementById("OrigenID");
 const destinoID = document.getElementById("DestinoID");
 const costoID = document.getElementById("CostoID");
@@ -137,7 +139,7 @@ let rutaMasCorta = () => {
   }
 };
 
-document.getElementById("generar").onclick = cargarGraficos;
+document.getElementById("btnGenerate").onclick = cargarGraficos;
 document.getElementById("encontraBoton").onclick = rutaMasCorta;
 
 let Limpiar = () => {
