@@ -1,9 +1,11 @@
 const btnAddTable = document.getElementById("btnAddTable");
 const btnGenerate = document.getElementById("btnGenerate");
-const btnClose = document.getElementById("btnClose");
+const btnClean = document.getElementById("btnClean");
 const origenID = document.getElementById("OrigenID");
 const destinoID = document.getElementById("DestinoID");
 const costoID = document.getElementById("CostoID");
+const rmcOrigen = document.getElementById("rmcOrigen");
+const rmcDestino = document.getElementById("rmcDestino");
 const nuevo = { nodes: [], edges: [] };
 let rutaCorta = [];
 const tabla = {};
@@ -15,8 +17,8 @@ btnAddTable.addEventListener("click", (event) => {
 });
 
 let añadir = () => {
-  let origen = origenID.value;
-  let destino = destinoID.value;
+  let origen = origenID.value.toUpperCase();
+  let destino = destinoID.value.toUpperCase();
   let costo = costoID.value;
 
   //Validacion agregada
@@ -30,7 +32,7 @@ let añadir = () => {
     if (!nuevo.nodes.find((element) => element.data.id == destino)) {
       nuevo.nodes.push({ data: { id: destino } });
     }
-    nuevo.edges.push({ data: { source: origen, target: destino, value: costo } });
+    nuevo.edges.push({ data: { source: origen, target: destino, value: costo, id: new Date().getTime() } });
     tabla.esta.clear().draw(); //Clear datatables
     tabla.esta.rows.add(nuevo.edges).draw();
     origenID.value = "";
@@ -91,8 +93,12 @@ let cargarGraficos = () => {
 
 let rutaMasCorta = () => {
   clearAllTags();
-  let origen = "#" + document.getElementById("rmcOrigen").value;
-  let destino = "#" + document.getElementById("rmcDestino").value;
+
+  const elemOrigen = document.getElementById("rmcOrigen");
+  const elemDestino = document.getElementById("rmcDestino");
+
+  let origen = "#" + elemOrigen.value.toUpperCase();
+  let destino = "#" + elemDestino.value.toUpperCase();
 
   //Validacion agregada
   if (origen == "#" || destino == "#") {
@@ -126,13 +132,15 @@ let rutaMasCorta = () => {
           }
 
           i++;
-          setTimeout(highlightNextEle, 500);
+          setTimeout(highlightNextEle, 2000);
         }
       };
       highlightNextEle();
       renderLabels();
 
       document.getElementById("resultado").innerHTML = "El valor del viaje es de " + total;
+      elemOrigen.value = "";
+      elemDestino.value = "";
     } catch (error) {
       console.log(error);
     }
@@ -178,12 +186,18 @@ $(document).ready(function () {
   tabla.esta = $("#datos").DataTable({
     ordering: false,
     searching: false,
-    paging: false,
+    paging: true,
     info: false,
     scrollY: "150px",
     scrollCollapse: true,
     data: nuevo.edges,
-    columns: [{ data: "data.source" }, { data: "data.target" }, { data: "data.value" }],
+    columns: [
+      { data: "data.id" },
+      { data: "data.source" },
+      { data: "data.target" },
+      { data: "data.value" },
+      { defaultContent: "<button class='delete btn btn-danger'>Eliminar</button>" },
+    ],
     select: true,
   });
 });
@@ -191,32 +205,41 @@ $(document).ready(function () {
 const renderLabels = () => {
   rutaCorta.forEach(({ id, origen, destino, acumulado }, index) => {
     if (index === 0) {
-      addPooper(destino, `[0,-]`);
-      if (id === origen) {
-        addPooper(origen, `[${acumulado},${destino}]`);
-      } else {
-        addPooper(destino, `[${acumulado},${origen}]`);
-      }
-      addPooper(origen, `[${acumulado},${destino}]`);
-    } else {
+      addPooper(id, `[0,-]`);
+    }
+    if (id === origen) {
       addPooper(destino, `[${acumulado},${origen}]`);
+    } else {
+      addPooper(origen, `[${acumulado},${destino}]`);
     }
   });
 };
 
-// [
-//   {
-//     id: "b",
-//     origen: "a",
-//     destino: "b",
-//     peso: "1",
-//     acumulado: 1,
-//   },
-//   {
-//     id: "a",
-//     origen: "a",
-//     destino: "c",
-//     peso: "1",
-//     acumulado: 2,
-//   },
-// ];
+const listenerOfDeleteRow = function (tbody, table) {
+  $(tbody).on("click", "button.delete", function () {
+    const {
+      data: { source, target, value, id },
+    } = table.esta.row($(this).parents("tr")).data();
+    origenID.value = source;
+    destinoID.value = target;
+    costoID.value = value;
+    $(this).closest("tr").remove();
+    nuevo.edges = nuevo.edges.filter((node) => node.data.id !== id);
+    const existenAdyacenciasOrigen = nuevo.edges.some(
+      (node) => node.data.source === source || node.data.target === source
+    );
+    const existenAdyacenciasDestino = nuevo.edges.some(
+      (node) => node.data.target === target || node.data.source === target
+    );
+
+    if (!existenAdyacenciasOrigen) {
+      nuevo.nodes = nuevo.nodes.filter((node) => node.data.id !== source);
+    }
+
+    if (!existenAdyacenciasDestino) {
+      nuevo.nodes = nuevo.nodes.filter((node) => node.data.id !== target);
+    }
+  });
+};
+
+listenerOfDeleteRow("#datos", tabla);
