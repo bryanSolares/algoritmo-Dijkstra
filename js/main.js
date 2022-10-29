@@ -132,7 +132,7 @@ let rutaMasCorta = () => {
           }
 
           i++;
-          setTimeout(highlightNextEle, 2000);
+          setTimeout(highlightNextEle, 500);
         }
       };
       highlightNextEle();
